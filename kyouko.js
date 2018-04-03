@@ -52,11 +52,26 @@ client.login(token);		//Passes API token to Discord
 
 //Takes simple description of event and the message to give a detailed description of bot usage
 function logEvent(eventDescriptor, message) {
-	console.log(
+	var date = new Date();
+	console.log( formatDate(date) + ' ' + 
 	eventDescriptor + ' from user "' + message.author.username + 
 	'" In server: "' + message.guild.name + 
-	'" In channel: "' + message.channel.name + '"');
+	'" In channel: "' + message.channel.name + '"' );
 }
+
+function formatDate(date) {
+	var day = date.getDate();
+	var monthIndex = date.getMonth();
+	var year = date.getFullYear();
+  
+	var hours = date.getHours();
+	var minutes = date.getMinutes();
+	var seconds = date.getSeconds();
+  
+	return '[' + hours + ':' + minutes + ':' + seconds + '][' + day + ' ' + monthNames[monthIndex] + ' ' + year + ']' ;
+}
+
+var monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "June", "July", "Aug", "Sept", "Oct", "Nov", "Dec"];
 
 var helpmsg = ` 
 		 List of Commands:
