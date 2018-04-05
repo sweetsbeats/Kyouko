@@ -1,14 +1,31 @@
 const Discord = require('discord.js');
+const fs = require('fs');
+
+
+const version = 'Ver.0.1';
+
 
 const client = new Discord.Client();		//creates the discord client (obviously)
 
 var data = require('./data.json');			//get the token from json
 var token = data.token;
 
+var serverList;								//list of all servers client is in, set when the "ready" event is triggered
+
+
 //			start up things
 client.on('ready', () => {
+	 console.log(img + version + '\n');  //print the Image and version number
   console.log(`Logged in as ${client.user.tag}!`);
+  serverList = client.guilds.array();
+  
+  console.log(`${client.user.tag} is currently in ${client.guilds.size} server(s), listed below:`);
+  serverList.forEach(  (element, index, array) => {
+					console.log(element.name);
+				} );
 });
+
+
 //			checks every new message
 client.on('message', msg => {
 	
@@ -22,7 +39,7 @@ client.on('message', msg => {
 //			Starts checking for implemented commands
 //ASS	
 			if ( m === "ass") {
-				msg.reply('gimmi');	 
+				msg.reply('gimmi');	 			
 				logEvent('!Ass', msg);
 //LOBBY
 			} else if (m === 'lobby') {
@@ -44,6 +61,9 @@ client.on('message', msg => {
 			} else if ( m === 'help') {
 				msg.author.send(String(helpmsg));
 				logEvent('Help asked for', msg);
+//TEST 															(For dev purposes)
+			} else if (m === 'test') {
+				
 			}
 		}
 	}
@@ -81,3 +101,12 @@ var helpmsg = `
 		 d##:   'Dice rolls of any sided die you please'
 		 ass:   'Gives kyouko a craving for your ass'
 		`; 	 
+		
+		var img = 
+`
+██╗  ██╗██╗   ██╗ ██████╗ ██╗   ██╗██╗  ██╗ ██████╗               ██████╗  ██████╗ ████████╗
+██║ ██╔╝╚██╗ ██╔╝██╔═══██╗██║   ██║██║ ██╔╝██╔═══██╗              ██╔══██╗██╔═══██╗╚══██╔══╝
+█████╔╝  ╚████╔╝ ██║   ██║██║   ██║█████╔╝ ██║   ██║    █████╗    ██████╔╝██║   ██║   ██║   
+██╔═██╗   ╚██╔╝  ██║   ██║██║   ██║██╔═██╗ ██║   ██║    ╚════╝    ██╔══██╗██║   ██║   ██║   
+██║  ██╗   ██║   ╚██████╔╝╚██████╔╝██║  ██╗╚██████╔╝              ██████╔╝╚██████╔╝   ██║   
+╚═╝  ╚═╝   ╚═╝    ╚═════╝  ╚═════╝ ╚═╝  ╚═╝ ╚═════╝               ╚═════╝  ╚═════╝    ╚═╝   `
