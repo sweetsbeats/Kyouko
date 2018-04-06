@@ -1,9 +1,7 @@
 const Discord = require('discord.js');
 const fs = require('fs');
 
-
 const version = 'Ver.0.1';
-
 
 const client = new Discord.Client();		//creates the discord client (obviously)
 
@@ -12,12 +10,12 @@ var token = data.token;
 
 var serverList;                       //list of all servers client is in, set when the "ready" event is triggered
 
-var OJServer = data.OJServer;
 var OJServerSnowflake = data.OJServerSnowflake;
 
 var lobbyName = data.lobbyName;
 var password = data.password;
 
+var wstream = fs.createWriteStream('log.txt');
 var logToText = data.logToText;
 
 
@@ -82,6 +80,17 @@ client.on('message', msg => {
 	}
     }
 });
+
+//                  log servers joined and left
+client.on('guildCreate', guild => {
+    logEvent(`Joined Server: ${guild.name}`);
+});
+
+client.on('guildDelete', guild => {
+    logEvent(`Left Server: ${guild.name}`);
+});
+
+
 client.login(token);		//Passes API token to Discord
 
 //Takes simple description of event and the message to give a detailed description of bot usage
@@ -92,8 +101,10 @@ function logEvent(eventDescriptor, message) {
 		      eventDescriptor + ' from user "' + message.author.username + 
 		      '" In server: "' + message.guild.name + 
 		      '" In channel: "' + message.channel.name + '"');
-
-    console.log(log );
+    console.log(log);
+    if (logToText === true) {
+	wstream.write(log + '\n');
+    }    
 }
 
 function formatDate(date) {
@@ -119,7 +130,7 @@ var helpmsg = `
 		 ass:   'Gives kyouko a craving for your ass'
 		`; 	 
 		
-		var img = 
+var img = 
 `
 ██╗  ██╗██╗   ██╗ ██████╗ ██╗   ██╗██╗  ██╗ ██████╗               ██████╗  ██████╗ ████████╗
 ██║ ██╔╝╚██╗ ██╔╝██╔═══██╗██║   ██║██║ ██╔╝██╔═══██╗              ██╔══██╗██╔═══██╗╚══██╔══╝
