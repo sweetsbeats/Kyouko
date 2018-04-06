@@ -39,7 +39,7 @@ client.on('message', msg => {
 	//Don't take commands from DMs, could leak or mess with lobby info	
     } else {
 	
-	if (msg.content.charAt(0) === '_') {		//checks if new message contains command char
+	if (msg.content.charAt(0) === '!') {		//checks if new message contains command char
 	    
 	    var m = msg.content.slice(1);			//cut off command char
 
