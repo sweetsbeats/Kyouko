@@ -1,15 +1,15 @@
 const Discord = require('discord.js');
 const fs = require('fs');
 
-var program = require('commander');
-
-
 const version = 'Ver.0.2';
 
 const client = new Discord.Client();		//creates the discord client (obviously)
 
 var data = require('./data.json');			//get the token from json
 var token = data.token;
+
+var weatherToken = data.weatherToken;
+var accuweather = require('node-accuweather')()(weatherToken);   //INIT accuweather with token
 
 var serverList;                       //list of all servers client is in, set when the "ready" event is triggered
 
@@ -42,7 +42,6 @@ client.on('ready', () => {
     
 });
 
-
 //			checks every new message
 client.on('message', msg => {
 	
@@ -53,9 +52,9 @@ client.on('message', msg => {
 	if (msg.content.charAt(0) === '!') {		//checks if new message contains command char
 	    
 	    var m = msg.content.slice(1);			//cut off command char
+//	Starts checking for implemented commands
 
-//			Starts checking for implemented commands
-//ASS	
+	    //ASS	
 	    if ( m === "ass") {
 		msg.reply('gimmi');	 			
 		logEvent('!Ass', msg);
@@ -84,6 +83,17 @@ client.on('message', msg => {
 	    } else if ( m === 'help') {
 		msg.author.send(String(helpmsg));
 		logEvent('Help asked for', msg);
+
+//WEATHER
+	    }else if (m.charAt(0) === 'w') {
+		var m = m.slice(2);//cut off command char to get city name
+		
+		accuweather.getCurrentConditions(m, {unit: "Celsius"})
+		    .then( result => {
+			msg.channel.send(`${m}: ${result.Temperature}c`);
+			logEvent(`Got weather for ${m}`, msg);
+		    });
+		
 //TEST 									(For dev purposes)
 	    } else if (m === 'test') {
 		console.log(msg.guild.id);
