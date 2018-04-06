@@ -1,7 +1,10 @@
 const Discord = require('discord.js');
 const fs = require('fs');
 
-const version = 'Ver.0.1';
+var program = require('commander');
+
+
+const version = 'Ver.0.2';
 
 const client = new Discord.Client();		//creates the discord client (obviously)
 
@@ -15,20 +18,28 @@ var OJServerSnowflake = data.OJServerSnowflake;
 var lobbyName = data.lobbyName;
 var password = data.password;
 
-var wstream = fs.createWriteStream('log.txt');
+var wstream = fs.createWriteStream('log.txt', {flags: 'a'});
 var logToText = data.logToText;
 
 
 //			start up things
 client.on('ready', () => {
-    console.log(img + version + '\n');  //print the Image and version number
-    console.log(`Logged in as ${client.user.tag}!`);
-    serverList = client.guilds.array();
-  
-    console.log(`${client.user.tag} is currently in ${client.guilds.size} server(s), listed below:`);
+    serverList = client.guilds.array();      // Gets list of servers
+    var startDate = formatDate(new Date());        // Start Date for more verbose logging
+    
+    var startUpText = img + version + '\n'
+	+`${startDate} ` + `Logged in as ${client.user.tag}!\n`
+	+`${client.user.tag} is currently in ${client.guilds.size} server(s), listed below:\n`;
+    
     serverList.forEach(  (element, index, array) => {
-	console.log(element.name);
+	startUpText += `${element.name}\n`;
     } );
+
+    console.log(startUpText);
+    if (logToText === true) {
+	wstream.write(startUpText + '\n');
+    }
+    
 });
 
 
@@ -93,6 +104,7 @@ client.on('guildDelete', guild => {
 
 client.login(token);		//Passes API token to Discord
 
+
 //Takes simple description of event and the message to give a detailed description of bot usage
 function logEvent(eventDescriptor, message) {
     var date = new Date();
@@ -132,6 +144,9 @@ var helpmsg = `
 		
 var img = 
 `
+
+
+
 ██╗  ██╗██╗   ██╗ ██████╗ ██╗   ██╗██╗  ██╗ ██████╗               ██████╗  ██████╗ ████████╗
 ██║ ██╔╝╚██╗ ██╔╝██╔═══██╗██║   ██║██║ ██╔╝██╔═══██╗              ██╔══██╗██╔═══██╗╚══██╔══╝
 █████╔╝  ╚████╔╝ ██║   ██║██║   ██║█████╔╝ ██║   ██║    █████╗    ██████╔╝██║   ██║   ██║   
