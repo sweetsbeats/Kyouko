@@ -1,2 +1,6 @@
 #ignore my json
-data.json
+*.json
+*.json~
+*txt
+*.txt~
+
