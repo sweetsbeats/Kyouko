@@ -8,6 +8,9 @@ const client = new Discord.Client();		//creates the discord client (obviously)
 var data = require('./data.json');			//get the token from json
 var token = data.token;
 
+//                     ISSUE: THIS DOESN'T WORK
+var logOptions = data.logOptions;
+
 var weatherToken = data.weatherToken;
 var accuweather = require('node-accuweather')()(weatherToken);   //INIT accuweather with token
 
@@ -21,13 +24,18 @@ var password = data.password;
 var wstream = fs.createWriteStream('log.txt', {flags: 'a'});
 var logToText = data.logToText;
 
+//                    SET LOG OPTIONS
+
+var logOptions = new Map();
+logOptions.set('verbose', data.log_verbose);
+
 
 //			start up things
 client.on('ready', () => {
     serverList = client.guilds.array();      // Gets list of servers
     var startDate = formatDate(new Date());        // Start Date for more verbose logging
     
-    var startUpText = img + version + '\n'
+    var startUpText = '\n'
 	+`${startDate} ` + `Logged in as ${client.user.tag}!\n`
 	+`${client.user.tag} is currently in ${client.guilds.size} server(s), listed below:\n`;
     
@@ -35,11 +43,15 @@ client.on('ready', () => {
 	startUpText += `${element.name}\n`;
     } );
 
-    console.log(startUpText);
-    if (logToText === true) {
-	wstream.write(startUpText + '\n');
-    }
+    console.log(img + version + startUpText);
     
+    if (logToText === true) {
+	if (logOptions.get('verbose') === true) {                        //Check TODO
+	    wstream.write( img + version + startUpText + '\n');
+	} else if (logOptions.get('verbose') === false) {
+	    wstream.write(startUpText);
+	}
+    }   
 });
 
 //			checks every new message
@@ -129,6 +141,19 @@ function logEvent(eventDescriptor, message) {
     }    
 }
 
+function createStartUpText(logToTextOption) {
+    var text;
+    if (logToTextOption === true) {
+	text += img + version + '\n';
+    } else {
+	text += 'Kyouko ' + version + '\n'
+    }
+    text += 
+	(`${startDate} ` + `Logged in as ${client.user.tag}!\n`
+	 +`${client.user.tag} is currently in ${client.guilds.size} server(s), listed below:\n`);   
+}
+
+
 function formatDate(date) {
     var day = date.getDate();
     var monthIndex = date.getMonth();
@@ -146,10 +171,11 @@ var monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "June", "July", "Aug", "Sep
 var helpmsg = ` 
 		 List of Commands:
 		 
-		 help:  'No shit theres a help function you numb-nutter'
-		 lobby: 'Gets current OJ lobby info'
-		 d##:   'Dice rolls of any sided die you please'
-		 ass:   'Gives kyouko a craving for your ass'
+		 help:       'No shit theres a help function you numb-nutter'
+		 lobby:      'Gets current OJ lobby info'
+		 d##:        'Dice rolls of any sided die you please'
+		 ass:        'Gives kyouko a craving for your ass'
+                 w 'city':   'Returns the weather for a given city'
 		`; 	 
 		
 var img = 
