@@ -98,12 +98,26 @@ client.on('message', msg => {
 
 //WEATHER
 	    }else if (m.charAt(0) === 'w') {
-		var m = m.slice(2);//cut off command char to get city name
+		var m = m.slice(1);//cut off command char to get city name
+		var u;
+		if (m.charAt(0) == 'f' ) {
+		    u  = 'Fahrenheit';
+		   var m =  m.slice(1);
+		} else {
+		    u = "Celsius";
+		}
+		var m = m.slice(1);
 		
-		accuweather.getCurrentConditions(m, {unit: "Celsius"})
+		accuweather.getCurrentConditions(m, {unit: u})
 		    .then( result => {
-			msg.channel.send(`${m}: ${result.Temperature}c`);
-			logEvent(`Got weather for ${m}`, msg);
+			if (u === 'Celsius') {
+			    msg.channel.send(`${m}: ${result.Temperature}`);
+			    logEvent(`Got weather for ${m}`, msg);
+			} else {
+			    var fahr = 1.8*result.Temperature + 32;          //convert manually (because accuweather API SUCKS)
+			    msg.channel.send(`${m}: ${Math.round(fahr)}`);
+			    logEvent(`Got weather for ${m}`, msg);
+			}
 		    });
 		
 //TEST 									(For dev purposes)
