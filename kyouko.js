@@ -8,6 +8,7 @@ const client = new Discord.Client();		//creates the discord client (obviously)
 var data = require('./data.json');			//get the token from json
 var token = data.token;
 
+
 //                     ISSUE: THIS DOESN'T WORK
 var logOptions = data.logOptions;
 
@@ -20,6 +21,7 @@ var OJServerSnowflake = data.OJServerSnowflake;
 
 var lobbyName = data.lobbyName;
 var password = data.password;
+
 
 var wstream = fs.createWriteStream('log.txt', {flags: 'a'});
 var logToText = data.logToText;
@@ -61,12 +63,11 @@ client.on('message', msg => {
 	//Don't take commands from DMs, could leak or mess with lobby info	
     } else {
 	
-	if (msg.content.charAt(0) === '!') {		//checks if new message contains command char
-	    
+	if (msg.content.charAt(0) === '!') {		//checks if new message contains command char	    
 	    var m = msg.content.slice(1);			//cut off command char
 //	Starts checking for implemented commands
-
 	    //ASS	
+
 	    if ( m === "ass") {
 		msg.reply('gimmi');	 			
 		logEvent('!Ass', msg);
@@ -120,6 +121,7 @@ client.on('message', msg => {
 			}
 		    });
 		
+
 //TEST 									(For dev purposes)
 	    } else if (m === 'test') {
 		console.log(msg.guild.id);
@@ -137,9 +139,7 @@ client.on('guildDelete', guild => {
     logEvent(`Left Server: ${guild.name}`);
 });
 
-
 client.login(token);		//Passes API token to Discord
-
 
 //Takes simple description of event and the message to give a detailed description of bot usage
 function logEvent(eventDescriptor, message) {
@@ -167,7 +167,6 @@ function createStartUpText(logToTextOption) {
 	 +`${client.user.tag} is currently in ${client.guilds.size} server(s), listed below:\n`);   
 }
 
-
 function formatDate(date) {
     var day = date.getDate();
     var monthIndex = date.getMonth();
@@ -184,18 +183,16 @@ var monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "June", "July", "Aug", "Sep
 
 var helpmsg = ` 
 		 List of Commands:
-		 
+
 		 help:       'No shit theres a help function you numb-nutter'
 		 lobby:      'Gets current OJ lobby info'
 		 d##:        'Dice rolls of any sided die you please'
 		 ass:        'Gives kyouko a craving for your ass'
-                 w 'city':   'Returns the weather for a given city'
-		`; 	 
-		
+     w 'city':   'Returns the weather for a given city'
+     wf 'city':  'Returns temperature as fahrenheit'                  
+		`; 	 		
 var img = 
 `
-
-
 
 ██╗  ██╗██╗   ██╗ ██████╗ ██╗   ██╗██╗  ██╗ ██████╗               ██████╗  ██████╗ ████████╗
 ██║ ██╔╝╚██╗ ██╔╝██╔═══██╗██║   ██║██║ ██╔╝██╔═══██╗              ██╔══██╗██╔═══██╗╚══██╔══╝
