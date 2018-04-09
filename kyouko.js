@@ -1,12 +1,19 @@
 const Discord = require('discord.js');
 const fs = require('fs');
 
-const version = 'Ver.0.1';
+const version = 'Ver.0.2';
 
 const client = new Discord.Client();		//creates the discord client (obviously)
 
 var data = require('./data.json');			//get the token from json
 var token = data.token;
+
+
+//                     ISSUE: THIS DOESN'T WORK
+var logOptions = data.logOptions;
+
+var weatherToken = data.weatherToken;
+var accuweather = require('node-accuweather')()(weatherToken);   //INIT accuweather with token
 
 var serverList;                       //list of all servers client is in, set when the "ready" event is triggered
 
@@ -15,22 +22,39 @@ var OJServerSnowflake = data.OJServerSnowflake;
 var lobbyName = data.lobbyName;
 var password = data.password;
 
-var wstream = fs.createWriteStream('log.txt');
+
+var wstream = fs.createWriteStream('log.txt', {flags: 'a'});
 var logToText = data.logToText;
+
+//                    SET LOG OPTIONS
+
+var logOptions = new Map();
+logOptions.set('verbose', data.log_verbose);
 
 
 //			start up things
 client.on('ready', () => {
-    console.log(img + version + '\n');  //print the Image and version number
-    console.log(`Logged in as ${client.user.tag}!`);
-    serverList = client.guilds.array();
-  
-    console.log(`${client.user.tag} is currently in ${client.guilds.size} server(s), listed below:`);
+    serverList = client.guilds.array();      // Gets list of servers
+    var startDate = formatDate(new Date());        // Start Date for more verbose logging
+    
+    var startUpText = '\n'
+	+`${startDate} ` + `Logged in as ${client.user.tag}!\n`
+	+`${client.user.tag} is currently in ${client.guilds.size} server(s), listed below:\n`;
+    
     serverList.forEach(  (element, index, array) => {
-	console.log(element.name);
+	startUpText += `${element.name}\n`;
     } );
-});
 
+    console.log(img + version + startUpText);
+    
+    if (logToText === true) {
+	if (logOptions.get('verbose') === true) {                        //Check TODO
+	    wstream.write( img + version + startUpText + '\n');
+	} else if (logOptions.get('verbose') === false) {
+	    wstream.write(startUpText);
+	}
+    }   
+});
 
 //			checks every new message
 client.on('message', msg => {
@@ -39,12 +63,11 @@ client.on('message', msg => {
 	//Don't take commands from DMs, could leak or mess with lobby info	
     } else {
 	
-	if (msg.content.charAt(0) === '_') {		//checks if new message contains command char
-	    
+	if (msg.content.charAt(0) === '!') {		//checks if new message contains command char	    
 	    var m = msg.content.slice(1);			//cut off command char
+//	Starts checking for implemented commands
+	    //ASS	
 
-//			Starts checking for implemented commands
-//ASS	
 	    if ( m === "ass") {
 		msg.reply('gimmi');	 			
 		logEvent('!Ass', msg);
@@ -73,6 +96,32 @@ client.on('message', msg => {
 	    } else if ( m === 'help') {
 		msg.author.send(String(helpmsg));
 		logEvent('Help asked for', msg);
+
+//WEATHER
+	    }else if (m.charAt(0) === 'w') {
+		var m = m.slice(1);//cut off command char to get city name
+		var u;
+		if (m.charAt(0) == 'f' ) {
+		    u  = 'Fahrenheit';
+		   var m =  m.slice(1);
+		} else {
+		    u = "Celsius";
+		}
+		var m = m.slice(1);
+		
+		accuweather.getCurrentConditions(m, {unit: u})
+		    .then( result => {
+			if (u === 'Celsius') {
+			    msg.channel.send(`${m}: ${result.Temperature}`);
+			    logEvent(`Got weather for ${m}`, msg);
+			} else {
+			    var fahr = 1.8*result.Temperature + 32;          //convert manually (because accuweather API SUCKS)
+			    msg.channel.send(`${m}: ${Math.round(fahr)}`);
+			    logEvent(`Got weather for ${m}`, msg);
+			}
+		    });
+		
+
 //TEST 									(For dev purposes)
 	    } else if (m === 'test') {
 		console.log(msg.guild.id);
@@ -90,7 +139,6 @@ client.on('guildDelete', guild => {
     logEvent(`Left Server: ${guild.name}`);
 });
 
-
 client.login(token);		//Passes API token to Discord
 
 //Takes simple description of event and the message to give a detailed description of bot usage
@@ -105,6 +153,18 @@ function logEvent(eventDescriptor, message) {
     if (logToText === true) {
 	wstream.write(log + '\n');
     }    
+}
+
+function createStartUpText(logToTextOption) {
+    var text;
+    if (logToTextOption === true) {
+	text += img + version + '\n';
+    } else {
+	text += 'Kyouko ' + version + '\n'
+    }
+    text += 
+	(`${startDate} ` + `Logged in as ${client.user.tag}!\n`
+	 +`${client.user.tag} is currently in ${client.guilds.size} server(s), listed below:\n`);   
 }
 
 function formatDate(date) {
@@ -123,15 +183,17 @@ var monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "June", "July", "Aug", "Sep
 
 var helpmsg = ` 
 		 List of Commands:
-		 
-		 help:  'No shit theres a help function you numb-nutter'
-		 lobby: 'Gets current OJ lobby info'
-		 d##:   'Dice rolls of any sided die you please'
-		 ass:   'Gives kyouko a craving for your ass'
-		`; 	 
-		
+
+		 help:       'No shit theres a help function you numb-nutter'
+		 lobby:      'Gets current OJ lobby info'
+		 d##:        'Dice rolls of any sided die you please'
+		 ass:        'Gives kyouko a craving for your ass'
+     w 'city':   'Returns the weather for a given city'
+     wf 'city':  'Returns temperature as fahrenheit'                  
+		`; 	 		
 var img = 
 `
+
 ██╗  ██╗██╗   ██╗ ██████╗ ██╗   ██╗██╗  ██╗ ██████╗               ██████╗  ██████╗ ████████╗
 ██║ ██╔╝╚██╗ ██╔╝██╔═══██╗██║   ██║██║ ██╔╝██╔═══██╗              ██╔══██╗██╔═══██╗╚══██╔══╝
 █████╔╝  ╚████╔╝ ██║   ██║██║   ██║█████╔╝ ██║   ██║    █████╗    ██████╔╝██║   ██║   ██║   
